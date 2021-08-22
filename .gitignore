@@ -5,3 +5,5 @@ workspace.code-workspace
 
 __pycache__
 .keras
+
+.DS_Store

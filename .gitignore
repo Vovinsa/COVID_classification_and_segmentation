@@ -1,5 +1,5 @@
-server/detection_model_weights
-server/classification_model_weights
+srv/detection_model_weights
+srv/classification_model_weights
 
 workspace.code-workspace
 

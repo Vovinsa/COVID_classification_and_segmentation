@@ -1,5 +1,4 @@
 from tensorflow.image import resize
-from tensorflow.keras.models import load_model
 from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Input, Concatenate, MaxPool2D, UpSampling2D, Add
 from tensorflow.keras.models import Model
@@ -35,7 +34,7 @@ def upsample_concat(x, skip):
     
     return merge
 
-def create_model(path):
+def create_model():
     input_shape = (256, 256, 3)
     X_input = Input(input_shape)
 
@@ -71,7 +70,6 @@ def create_model(path):
     output = Conv2D(3, (1,1), kernel_initializer="he_normal", padding="same", activation="sigmoid")(up_4)
 
     model = Model(X_input, output)
-    model.load_weights("server/seg_model_w/weights")
 
     return model
 
@@ -80,7 +78,7 @@ def predict(model, img):
     mask = model.predict(img[None, ...])
     return img, mask
 
-def visualize(img, mask):
+def visualize(path, img, mask):
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
     img = cv2.addWeighted(img, 1, mask * 255, 0.4, 0.0)
-    cv2.imwrite("./detect.png", img)
+    cv2.imwrite(path, img)

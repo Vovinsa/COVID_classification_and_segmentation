@@ -47,7 +47,7 @@ function main(){
         alert("Произошла ошибка!");
         location.reload();
       } );
-      XHR.open("POST", "http://192.168.100.14:5000/predict");
+      XHR.open("POST", "http://localhost:5000/predict");
       XHR.send(FD);
     }
     $("form").change(function(event) 

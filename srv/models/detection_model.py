@@ -4,10 +4,6 @@ from tensorflow.keras.models import Model
 from tensorflow import keras
 import tensorflow as tf
 import numpy as np
-import cv2
-
-def swap_xy(boxes):
-  return tf.stack([boxes[:, 1], boxes[:, 0], boxes[:, 3], boxes[:, 2]], axis=-1)
 
 def convert_to_xywh(boxes):
   return tf.concat([(boxes[..., :2] + boxes[..., 2:]) / 2.0, boxes[..., 2:] - boxes[..., :2]], axis=-1)
@@ -220,7 +216,7 @@ def prepare_image(image):
   image = tf.keras.applications.resnet.preprocess_input(image)
   return tf.expand_dims(image, axis=0), ratio
 
-def create_model(num_classes): # Function for creating model
+def create_model(num_classes):
     resnet50_backbone = get_backbone()
     model = RetinaNet(num_classes, resnet50_backbone)
 

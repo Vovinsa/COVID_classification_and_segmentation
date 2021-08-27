@@ -7,3 +7,5 @@ __pycache__
 .keras
 
 .DS_Store
+
+temp

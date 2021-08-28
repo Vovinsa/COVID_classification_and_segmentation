@@ -2,12 +2,14 @@
 
 - run:
 
-```pip3 install requirements.txt
+```
+pip3 install requirements.txt
 ```
 
 - run:
 
-```python3 main.py
+```
+python3 main.py
 ```
 
 ## If you are using Mac on M1

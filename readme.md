@@ -12,6 +12,17 @@ pip3 install requirements.txt
 python3 main.py
 ```
 
+## Work big pack of images
+
+- place files to work to the folder "input"
+- run:
+
+```
+python3 work_directory.py
+```
+
+- get your worked images in "output"
+
 ## If you are using Mac on M1
 
 - download [Miniforge](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh)

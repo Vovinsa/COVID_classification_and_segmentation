@@ -10,6 +10,7 @@ from srv.models import segmenation_model, detection_model, classification_model
 class Core:
     def __init__(self):
         super().__init__()
+        
         self.classification_model = classification_model.create_model()
         self.classification_model.load_weights("srv/classification_model_weights/weights.h5")
         self.detect_model = detection_model.create_model(num_classes=2)
@@ -53,23 +54,28 @@ class Core:
         lungs_square = 0
         defeats = []
         lungs = []
-        for index, box in enumerate(boxes):
-            box = boxes[index]
-            class_name = class_names[index]
-            x1, y1, x2, y2 = box
-            square = (x2 - x1) * (y2 - y1)
-            if class_name == "Defeat":
-                defeats_square += square
-                defeats.append(box)
-            else:
-                lungs_square += square
-                lungs.append(box)
-            data["detections"].append({"score": round(scores[index], 2), "box": box, "class_name": class_name})
-        lungs.sort(key = lambda x: x[0])
-        data["left_defeat"], data["right_defeat"] = self.comp_defs(lungs, defeats)
-        data["defeat_sqare"] = round(defeats_square / lungs_square * 100)
+        if len(boxes) == 0:
+            data["left_defeat"], data["right_defeat"] = 0, 0
+            data["defeat_sqare"] = 0
+            result = 0
+        else:
+            for index, box in enumerate(boxes):
+                box = boxes[index]
+                class_name = class_names[index]
+                x1, y1, x2, y2 = box
+                square = (x2 - x1) * (y2 - y1)
+                if class_name == "Defeat":
+                    defeats_square += square
+                    defeats.append(box)
+                else:
+                    lungs_square += square
+                    lungs.append(box)
+                data["detections"].append({"score": round(scores[index], 2), "box": box, "class_name": class_name})
+            lungs.sort(key = lambda x: x[0])
+            data["left_defeat"], data["right_defeat"] = self.comp_defs(lungs, defeats)
+            data["defeat_sqare"] = round(defeats_square / lungs_square * 100)
+
         data["img_url"] = output_path
-        
         data["stats"] = {"all_time": round(time() - time_start, 2), "first_net": round(time_first_net - time_start, 2), "second_net": round(time() - time_first_net, 2)}
         return json.dumps({"success": True, "result": result, "data": data})
     

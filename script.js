@@ -5,17 +5,17 @@ function make_result_info(data){
     duration: 2000,
     step: function (num) {
       percent = (num + 3).toFixed(2)
-      this.innerHTML = "Шанс ковида: " + percent + "%"
+      this.innerHTML = "A chance of COVID: " + percent + "%"
     }
   });
-  text = "Поражено <b>" + data.data.defeat_sqare + "%</b> легких<br><br>"+
-            "Левое легкое: " + data.data.left_defeat + " поражений<br>"+
-            "Правое легкое: " + data.data.right_defeat + " поражений<br>"
+  text = "Defeats <b>" + data.data.defeat_sqare + "%</b> of lungs<br><br>"+
+            "Left lung: " + data.data.left_defeat + " defeats<br>"+
+            "Right lung: " + data.data.right_defeat + " defeats<br>"
   $(".info_container .res").html(text)
   
-  stats_text = "Классификация: " + data.data.stats.first_net + " сек.<br>"+
-                "Детекция: " + data.data.stats.second_net + " сек.<br>"+
-                "Всего: " + data.data.stats.all_time + " сек."
+  stats_text = "Classification: " + data.data.stats.first_net + " s.<br>"+
+                "Detection: " + data.data.stats.second_net + " s.<br>"+
+                "Total: " + data.data.stats.all_time + " s."
   $(".info_container .stats").html(stats_text)
 }
 
@@ -44,7 +44,7 @@ function main(){
         make_result_info(res, is_covid)
       } );
       XHR.addEventListener("error", function( event ) {
-        alert("Произошла ошибка!");
+        alert("Error!");
         location.reload();
       } );
       XHR.open("POST", "http://localhost:5000/predict");

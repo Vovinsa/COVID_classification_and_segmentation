@@ -1,12 +1,12 @@
 # Covid classification and segmentation
 
-- run:
+- to install requirements run:
 
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 
-- run:
+- to start run:
 
 ```
 python3 main.py

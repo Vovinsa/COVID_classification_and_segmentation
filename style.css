@@ -1,5 +1,4 @@
 html, body{
-    /* background-color: rgb(65, 25, 212); */
     width: 100%;
     height: 100%;
     display: flex;
@@ -70,11 +69,16 @@ body{
 #file{
     color:white
 }
-.result_image{
+.result_image, .result1_image, .result2_image{
     width: 100%;
     border-radius: 5px;
     height: 100%;
     display: none;
+    position: absolute;
+}
+.result2_image{
+    opacity: 0.35;
+    display: block;
 }
 .form_container{
     width: 10%;

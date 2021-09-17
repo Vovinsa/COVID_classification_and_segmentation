@@ -26,5 +26,5 @@ for image in images:
     img_orig = img_to_array(load_img(joinpath(work_dir, image)))
     img, mask = segmenation_model.predict(seg_model, img_orig)
     segmenation_model.visualize(joinpath(output_dir, image), img_to_array(img), img_to_array(mask[0, ...]))
-    print(f"Image {image} worked in {round(time()-start_time, 2)} sec")
-print(f"Done, {len(images)} worked successfully in {round(time()-boot_time, 2)} sec.")
+    print(f"Image {image} worked in {round(time()-start_time, 2)}s.")
+print(f"Done, {len(images)} worked successfully in {round(time()-boot_time, 2)}s.")

@@ -2,7 +2,6 @@ import http.server
 import socketserver
 from threading import Thread
 from webbrowser import open as open_url
-
 from srv.api import run as run_api
 
 def run_interface(host="", port=80):

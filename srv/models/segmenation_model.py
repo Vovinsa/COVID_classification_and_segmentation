@@ -3,10 +3,10 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Input, Concatenate, MaxPool2D, UpSampling2D, Add
 from tensorflow.keras.models import Model
 import cv2
-from PIL import Image
 import numpy as np
+from PIL import Image
+from skimage import io, morphology, measure
 from sklearn.cluster import KMeans
-from skimage import morphology, measure
 
 def iou(y_true, y_pred, smooth=1):
     intersection = K.sum(K.abs(y_true * y_pred), axis=[1, 2])
@@ -82,34 +82,44 @@ def predict(model, img):
     mask = model.predict(img[None, ...])
     return img, mask
 
+
 def visualize(path, mask, size=None):
-    mask *= 255
-    mask = np.around(mask)
+    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
     if size:
         mask = np.array(resize(mask, size))
-    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-    cv2.imwrite(path, mask)
+    cv2.imwrite(path, mask * 255)
+    mask = np.around(mask)
+    cv2.imwrite(path.replace("_web", ""), mask*255)
+
     return np.sum(mask)
 
-def calc_defeats(lungs_output_path, defeats_output_path):
-    src = np.array(Image.open(defeats_output_path))
-    mask_orig = Image.open(lungs_output_path)
+def visualize_with_mask(path, img, mask, size=None):
+    mask *= 255
+    if size:
+        mask = np.array(resize(mask, size))
+    img = cv2.addWeighted(img, 1, mask, 0.4, 0.0)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    cv2.imwrite(path, img)
+    return
 
+
+def calc_defeats(lungs_output_path, defeats_output_path):
+    src = np.array(Image.open(defeats_output_path.replace("_web", "")))
+    mask_orig = Image.open(lungs_output_path.replace("_web", ""))
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
+
     mask[:, :, 1] = mask[:, :, 0]
     mask[:, :, 2] = mask[:, :, 0]
     mask = mask / 255
-    dst = src * mask
-    left = count_points(np.around(dst / 255) * 255)
-    Image.fromarray(dst.astype(np.uint8)).save('temp/left_defeats.png')
-
+    ldst = src * mask
+    left = count_points(np.around(ldst/255)*255)
+    
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
     mask[:, :, 0] = mask[:, :, 1]
     mask[:, :, 2] = mask[:, :, 1]
     mask = mask / 255
-    dst = src * mask
-    right = count_points(np.around(dst/255)*255)
-    Image.fromarray(dst.astype(np.uint8)).save('temp/right_defeats.png')
+    rdst = src * mask
+    right = count_points(np.around(rdst / 255) * 255)
     return left, right
 
 
@@ -118,7 +128,7 @@ def count_points(img):
     X = img.reshape(rows * cols, bands)
     kmeans = KMeans(n_clusters=3, random_state=0).fit(X)
     labels = kmeans.labels_.reshape(rows, cols)
-    all_count = 0
+    all_count=0
     for i in np.unique(labels):
         blobs = np.int_(morphology.binary_opening(labels == i))
         color = list(np.around(kmeans.cluster_centers_[i]))

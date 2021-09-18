@@ -5,7 +5,7 @@ from tensorflow.keras.models import Model
 import cv2
 import numpy as np
 from PIL import Image
-from skimage import io, morphology, measure
+from skimage import morphology, measure
 from sklearn.cluster import KMeans
 
 def iou(y_true, y_pred, smooth=1):
@@ -89,7 +89,7 @@ def visualize(path, mask, size=None):
         mask = np.array(resize(mask, size))
     cv2.imwrite(path, mask * 255)
     mask = np.around(mask)
-    cv2.imwrite(path.replace("_web", ""), mask*255)
+    cv2.imwrite(path.replace("_web", ""), mask * 255)
 
     return np.sum(mask)
 

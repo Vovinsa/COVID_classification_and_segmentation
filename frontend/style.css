@@ -178,3 +178,30 @@ body{
     bottom: 2%;
     width: 90%;
 }
+@-webkit-keyframes spin {  
+    from {  
+        -webkit-transform: rotate(0deg);  
+    }  
+    to {  
+        -webkit-transform: rotate(360deg);  
+        } 
+    }    
+.wheel {
+    height: 20%;
+    width: 23%;
+    top: -10%;
+    left: 0%;
+    position: fixed;
+    transform-origin: 0px 0px;
+    -webkit-animation-name: spin; 
+    -webkit-animation-iteration-count: infinite; 
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-duration: 3s; 
+}
+@keyframes moving {
+    100% {transform: rotate(-360deg);}
+}
+.element {
+    animation: moving 3s infinite linear;
+    transform-origin: -80px -80px;
+}

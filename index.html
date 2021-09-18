@@ -24,16 +24,22 @@
             
             <div class="result_container" style="display: none;">
                 <img class="result_image" src="">
+                <img class="result1_image" src="">
                 <img class="result2_image" src="">
             </div>
         </div>
         <div class="info_container">
-            <p class="chance"></p>
             <p class="res"></p>
+            <div class="controls">
+                <p>Overlaying a lungs mask:</p>
+                <input type="range" id="lungs" min="0" max="1" oninput="lungsOpacity(this.value)" value="0.05" step="0.01">
+                <p>Overlaying a defeats mask:</p>
+                <input type="range" id="defeats" min="0" max="1" oninput="defeatsOpacity(this.value)" value="0.3" step="0.01">
+            </div>
             <div class="bottom_panel">
                 <p class="stats"></p>
                 <div class="refresh_page">Repeat</div>
             </div>
         </div>
 </body>
-</html>
+</html></html>

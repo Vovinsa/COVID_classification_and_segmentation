@@ -1,6 +1,3 @@
-srv/detection_model_weights
-srv/classification_model_weights
-
 workspace.code-workspace
 
 __pycache__

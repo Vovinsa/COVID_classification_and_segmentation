@@ -12,7 +12,7 @@ for dir in [work_dir, output_dir]:
         mkdir(dir)
 
 seg_model = segmenation_model.create_model()
-seg_model.load_weights("srv/seg_model_w/weights.h5")
+seg_model.load_weights("srv/defeats_segmentation_model_weights/weights.h5")
 print("Model loaded")
 
 images = listdir(work_dir)

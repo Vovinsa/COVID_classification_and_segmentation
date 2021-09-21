@@ -39,5 +39,5 @@ python -m pip install tensorflow-macos
 python -m pip install tensorflow-metal
 ```
 
-!["COVID"](COVID.mp4)
+!["img"](covid.png)
   

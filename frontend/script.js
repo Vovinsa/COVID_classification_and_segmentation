@@ -8,20 +8,20 @@ function defeatsOpacity(value){
 }
 
 function make_result_info(data){
-  if(data.data.defeat_square==3){
+  if(data.data.affections_square==3){
       $("body").append("<img src='frontend/luka.png' class='wheel'>");
       setTimeout(function(){
         $(".luka").animate({  textIndent: 0 }, {
-            step: function(now,fx) {
+            step: function(now) {
               $(this).css('-webkit-transform','rotate('+now+'deg)'); 
             },
             duration:'slow'
         },'linear')}, 200
       );
   }
-  text = "Defeats <b>" + data.data.defeat_square + "%</b> of lungs<br><br>"+
-            "Left lung: " + data.data.left_defeat + " defeats<br>"+
-            "Right lung: " + data.data.right_defeat + " defeats<br>"
+  text = "Affected <b>" + data.data.affections_square + "%</b> of lungs<br><br>"+
+            "Left lung: " + data.data.left_affections + " affections<br>"+
+            "Right lung: " + data.data.right_affections + " affections<br>"
   $(".info_container .res").html(text)
   $(".info_container .stats").html("Total: " + data.data.stats.all_time + " s.")
 }

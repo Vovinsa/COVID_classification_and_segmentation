@@ -77,11 +77,23 @@ def create_model():
 
     return model
 
+def correct_affections(path, lmask, amask, size):
+    mask = np.around(lmask[0, ...])
+
+    lungs = mask[:,:,0] + mask[:,:,1]
+    mask[:,:,0] = lungs
+    mask[:,:,1] = lungs
+    mask[:,:,2] = lungs
+
+    res_affections = (mask * amask[0, ...]) * 255
+    res_affections = cv2.cvtColor(res_affections, cv2.COLOR_BGR2RGB)
+    res_affections = np.array(resize(res_affections, size))
+    cv2.imwrite(path, res_affections)
+
 def predict(model, img):
     img = resize(img, (256, 256))
     mask = model.predict(img[None, ...])
-    return img, mask
-
+    return mask
 
 def visualize(path, mask, size=None):
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
@@ -90,7 +102,6 @@ def visualize(path, mask, size=None):
     cv2.imwrite(path, mask * 255)
     mask = np.around(mask)
     cv2.imwrite(path.replace("_web", ""), mask * 255)
-
     return np.sum(mask)
 
 def visualize_with_mask(path, img, mask, size=None):
@@ -100,11 +111,9 @@ def visualize_with_mask(path, img, mask, size=None):
     img = cv2.addWeighted(img, 1, mask, 0.4, 0.0)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     cv2.imwrite(path, img)
-    return
 
-
-def calc_defeats(lungs_output_path, defeats_output_path):
-    src = np.array(Image.open(defeats_output_path.replace("_web", "")))
+def calc_affections(lungs_output_path, affections_output_path):
+    src = np.array(Image.open(affections_output_path.replace("_web", "")))
     mask_orig = Image.open(lungs_output_path.replace("_web", ""))
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
 
@@ -112,7 +121,7 @@ def calc_defeats(lungs_output_path, defeats_output_path):
     mask[:, :, 2] = mask[:, :, 0]
     mask = mask / 255
     ldst = src * mask
-    left = count_points(np.around(ldst/255)*255)
+    left = count_points(np.around(ldst / 255) * 255)
     
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
     mask[:, :, 0] = mask[:, :, 1]
@@ -132,7 +141,7 @@ def count_points(img):
     for i in np.unique(labels):
         blobs = np.int_(morphology.binary_opening(labels == i))
         color = list(np.around(kmeans.cluster_centers_[i]))
-        if color==[0,0,0]:
+        if color==[0, 0, 0]:
             continue
         count = len(np.unique(measure.label(blobs))) - 1
         all_count += count

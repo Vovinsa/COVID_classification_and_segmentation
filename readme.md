@@ -18,7 +18,7 @@ python3 main.py
 - run:
 
 ```
-python3 work_directory.py
+python3 process_the_directory.py -h
 ```
 
 - get your worked images in "output"

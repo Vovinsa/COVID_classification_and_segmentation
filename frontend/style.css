@@ -8,10 +8,18 @@ html, body{
 body{
     background-image: url("./background.jpg");
     background-size: 100%;
-    background-position: center;
+    background-position: cover;
     background-repeat: no-repeat;
     padding-top: 1%;
 }
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 .upload_container{
     background-color: rgb(0,0,0,0.5);
     width: 60%;
@@ -204,4 +212,22 @@ body{
 .element {
     animation: moving 3s infinite linear;
     transform-origin: -80px -80px;
+}
+
+.footer {
+    margin-bottom: 30px;
+}
+
+.social_networks {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20%;
+}
+
+.social_networks > a > img {
+    width: 35px;
+    height: 35px;
 }

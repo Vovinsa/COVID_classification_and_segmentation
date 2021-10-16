@@ -8,7 +8,8 @@ python3 install -r COVID_Django/requirements.txt
 
 - run to start server:
 
-```cd COVID_Django
+```
+cd COVID_Django
 python3 manage.py runserver 0.0.0.0:5000
 ```
 
@@ -17,7 +18,8 @@ python3 manage.py runserver 0.0.0.0:5000
 - download [Miniforge](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh)
 - run to install tensorflow for Mac with M1:
 
-```python3 -m venv ~/tensorflow-metal
+```
+python3 -m venv ~/tensorflow-metal
 source ~/tensorflow-metal/bin/activate
 python -m pip install -U pip
 chmod +x ~/Downloads/Miniforge3-MacOSX-arm64.sh
@@ -36,7 +38,8 @@ python3 install -r COVID_Django/requirements.txt
 
 - run to start server:
 
-```cd COVID_Django
+```
+cd COVID_Django
 python3 manage.py runserver 0.0.0.0:5000
 ```
 

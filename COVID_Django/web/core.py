@@ -11,7 +11,10 @@ import os
 import pydicom as dicom
 import SimpleITK as sitk
 import numpy as np
+import matplotlib.pyplot as plt
 import cv2
+import nibabel as nib
+
 
 class Core:
     def __init__(self):
@@ -50,13 +53,15 @@ class Core:
         #Crop defeats
         model.correct_defeats(defeats_output_path, lung_mask, defeat_mask, size)
 
-        data["affections_square"] = round(defeat_pixels/lung_pixels*100)
+        data["affections_square"] = round(defeat_pixels / lung_pixels * 100)
         data["left_affections"], data["right_affections"] = model.calc_defeats(lungs_output_path, defeats_output_path)
         data["img_url"] = path, lungs_output_path, defeats_output_path
         data["stats"] = {"all_time": round(time() - time_start, 2)}
         return {"success": True, "result": "ok", "is_dicom": False, "data": data}
+    
 
     def work_dicom(self, path, file_stream):
+        # Extract incoming zip
         if isdir(path):
             rmtree(path)
         arch = zipfile.ZipFile(file_stream)
@@ -71,12 +76,20 @@ class Core:
         left_defeats_volume = 0
         right_defeats_volume = 0
 
-        info_img = dicom.read_file(join_path(path, slices[0]))
-        spacing_between_slices = 3
-        slice_thickness =  info_img.SliceThickness
+        is_nibabel = False
+        if slices[0].split(".")[-1] in ["nii", "gz"]:
+            is_nibabel = True
+        if is_nibabel:
+            spacing_between_slices = 3
+            slice_thickness = 3
+            pixel_size = 0.7
+        else:
+            info_img = dicom.read_file(join_path(path, slices[0]))
+            spacing_between_slices = 0
+            slice_thickness = info_img.SliceThickness
+            pixel_size = np.mean(info_img.PixelSpacing)
+            image_size = info_img.pixel_array[..., None].shape
         slice_distance = slice_thickness + spacing_between_slices
-        pixel_size = np.mean(info_img.PixelSpacing)
-        image_size = info_img.pixel_array[..., None].shape
 
         jpg_paths_orig = []
         jpg_paths_overlay = []
@@ -91,22 +104,26 @@ class Core:
             os.mkdir(result_dir_path)
         
         for slice_name in enumerate(slices):
-            if slice_name[1] == "__MACOSX":
-                continue
             slice_path = join_path(path, slice_name[1])
-            file = dicom.read_file(slice_path)
-            img = file.pixel_array[..., None]
+            if is_nibabel:
+                file = nib.load(slice_path)
+                img = file.get_fdata()
+                image_size = img.shape
+            else:
+                file = dicom.read_file(slice_path)
+                img = file.pixel_array[..., None]
             
             mask_affections = model.predict_dicom(self.defeats_1ch, img)
-            mask_affections = np.around(mask_affections)
+            mask_affections = mask_affections
 
             mask_lungs = model.predict_dicom(self.lungs_1ch, img)
             mask_lungs = np.around(mask_lungs)
 
-            overlay = img[..., 0] + resize(mask_affections[0, ...], (image_size[0], image_size[1]))[..., 0]
+            overlay = img[..., 0] + resize(mask_affections[0, ...], (image_size[0], image_size[1]))[..., 0] * 255
             overlay = np.array(overlay)
+    
             worked_slices.append(overlay)
-
+        
             left_lung = mask_lungs[..., 0]
             right_lung = mask_lungs[..., 1]
 
@@ -126,32 +143,36 @@ class Core:
             left_defeats_mm2 = left_defeats_pixels * pixel_size 
             right_defeats_mm2 = right_defeats_pixels * pixel_size 
 
+
             #Calc affection square in mm3
             left_defeats_volume += left_defeats_mm2 * slice_distance 
             right_defeats_volume += right_defeats_mm2 * slice_distance
 
-            if i == 2:
-                i = 0
-                orig_path = join_path(result_dir_path, slice_name[1] + ".jpg")
-                overlay_path = join_path(result_dir_path, slice_name[1] + "_overlay.jpg")
-                cv2.imwrite(orig_path, file.pixel_array)
+            if i==2:
+                i=0
+                orig_path = join_path(result_dir_path, slice_name[1]+".jpg")
+                overlay_path = join_path(result_dir_path, slice_name[1]+"_overlay.jpg")
+                cv2.imwrite(orig_path, img*1.5)
                 jpg_paths_orig.append(orig_path)
-                cv2.imwrite(overlay_path, overlay)
+                cv2.imwrite(overlay_path, np.around(resize(mask_affections[0, ...], (image_size[0], image_size[1])) * 255))
                 jpg_paths_overlay.append(overlay_path)
-            i += 1
-   
-        left_affection_percent = np.mean(left_affection_percent)
+            i+=1
+        #Усредняем проценты поражения
+        left_affection_percent = np.mean(left_affection_percent) 
         right_affection_percent = np.mean(right_affection_percent)
         
         pred_slice = np.array(worked_slices, dtype=np.uint16)
         pred_slice = sitk.GetImageFromArray(pred_slice)
-        result_path = join_path(path, "result", f"{slice_name[0]}.dcm")
+        if is_nibabel:
+            result_path = join_path(path, "result", f"{slice_name[0]}.nii")
+        else:
+            result_path = join_path(path, "result", f"{slice_name[0]}.dcm")
         sitk.WriteImage(pred_slice, result_path)
-    
+
         data = {}
-        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent * 100, 2), round(right_affection_percent * 100, 2)
-        data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume / 1000, 2), round(right_defeats_volume / 1000, 2)
-        data["img_urls"] = jpg_paths_orig
+        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent * 1000, 2), round(right_affection_percent*100, 2)
+        data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume / 10000, 2), round(right_defeats_volume / 1000, 2)
+        data["img_urls"] = jpg_paths_orig, jpg_paths_overlay
         data["archive"] = result_path
         data["slice_count"] = len(slices)
         data["stats"] = {"all_time": round(time() - time_start, 2)}

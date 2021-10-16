@@ -45,4 +45,5 @@ python3 manage.py runserver 0.0.0.0:5000
 
 !["img"](covid.png)
 !["img_main"](covid_main.png)
+!["img_dicom_viewer"](dicom_viewer.png)
   

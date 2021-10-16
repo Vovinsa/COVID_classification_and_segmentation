@@ -15,11 +15,18 @@
     <div class="main">
         <div class="upload_container">
             <div class="form_container">
-                <form method="post" enctype="multipart/form-data">
+                <form class="form_image" method="post" enctype="multipart/form-data">
                     <input type=file name="files" id="choose_file" style="display: none;" accept="image/*"/>
                     <input type=submit  style="display: none;"/>
                     <div class="browse_ct">
-                        <label for="choose_file">Open CT</label>
+                        <label for="choose_file">Open CT (png)</label>
+                    </div>
+                </form>
+                <form class="form_dicom" method="post" enctype="multipart/form-data">
+                    <input type=file name="files" id="choose_dicom_file" style="display: none;" accept=".zip"/>
+                    <input type=submit  style="display: none;"/>
+                    <div class="browse_ct">
+                        <label for="choose_dicom_file">Open CT (DICOM .zip)</label>
                     </div>
                 </form>
             </div>
@@ -46,9 +53,9 @@
     </div>
     <div class="footer">
         <div class="social_networks">
-            <a href="https://natribu.org"><img class="networks_img" src="./frontend/instagram.png" alt="Instagram"></a>
-            <a href="https://natribu.org"><img class="networks_img" src="./frontend/github.png" alt="Github"></a>
-            <a href="https://natribu.org"><img class="networks img" src="./frontend/telegram.png" alt="Telegram"></a>
+            <a href="#"><img class="networks_img" src="./frontend/instagram.png" alt="Instagram"></a>
+            <a href="#"><img class="networks_img" src="./frontend/github.png" alt="Github"></a>
+            <a href="#"><img class="networks img" src="./frontend/telegram.png" alt="Telegram"></a>
         </div>
     </div>
 </div>

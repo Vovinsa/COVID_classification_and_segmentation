@@ -37,9 +37,9 @@ class DicomPredictAPI(generics.GenericAPIView):
 	def post(self, request, *args, **kwargs):
 		serializer = self.get_serializer(data=request.data)
 		if serializer.is_valid():
-			result = core.work_dicom(join_path("temp_arch"), serializer.validated_data['files'])
+			path = join_path("frontend", "temp")
+			result = core.work_dicom(path, serializer.validated_data['files'])
 			print(result)
-			return Response({result})
+			return Response(result)
 		else: 
 			return Response({"error": serializer.errors})
-

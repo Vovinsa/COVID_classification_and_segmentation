@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 from skimage import morphology, measure
 from sklearn.cluster import KMeans
+import sklearn
 
 def iou(y_true, y_pred, smooth=1):
     intersection = K.sum(K.abs(y_true * y_pred), axis=[1, 2])
@@ -38,8 +39,8 @@ def upsample_concat(x, skip):
     
     return merge
 
-def create_model():
-    input_shape = (256, 256, 3)
+def create_model(in_ch, out_ch):
+    input_shape = (256, 256, in_ch)
     X_input = Input(input_shape)
 
     conv_1 = Conv2D(16, 3, activation="relu", padding="same", kernel_initializer="he_normal")(X_input)
@@ -71,13 +72,19 @@ def create_model():
     up_4 = upsample_concat(up_3, conv_1)
     up_4 = resblock(up_4, 16)
 
-    output = Conv2D(3, (1,1), kernel_initializer="he_normal", padding="same", activation="sigmoid")(up_4)
+    output = Conv2D(out_ch, (1,1), kernel_initializer="he_normal", padding="same", activation="sigmoid")(up_4)
 
     model = Model(X_input, output)
 
     return model
 
 def predict(model, img):
+    img = resize(img, (256, 256))
+    mask = model.predict(img[None, ...])
+    return mask
+
+def predict_dicom(model, img):
+    img = sklearn.preprocessing.normalize(img[..., 0])[..., None]
     img = resize(img, (256, 256))
     mask = model.predict(img[None, ...])
     return mask

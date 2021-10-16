@@ -7,7 +7,7 @@
     <script src="frontend/jquery-3.6.0.min.js"></script>
     <script src="frontend/script.js"></script>
     <link rel="stylesheet" href="frontend/style.css">
-    <title>COVID</title>
+    <title>KeepIt</title>
     <link rel="icon" href="frontend/icon.png" type="image/x-icon">
 </head>
 <body>
@@ -40,13 +40,14 @@
         <div class="info_container">
             <p class="res"></p>
             <div class="controls">
-                <p>Overlaying a lungs mask:</p>
+                <p id="text_range_lungs">Overlaying a lungs mask:</p>
                 <input type="range" id="lungs" min="0" max="1" oninput="lungsOpacity(this.value)" value="0.05" step="0.01">
-                <p>Overlaying a defeats mask:</p>
+                <p id="text_range_defeats">Overlaying an affections mask:</p>
                 <input type="range" id="defeats" min="0" max="1" oninput="defeatsOpacity(this.value)" value="0.3" step="0.01">
             </div>
-            <div class="btn_download">
-                <button>Download</button>
+            <div class="btn_download" style="display: none;">
+                <form id="form_download" method="get" action="" style="display: none;"></form>
+                <button>Download CT</button>
             </div>
             <div class="bottom_panel">
                 <p class="stats"></p>

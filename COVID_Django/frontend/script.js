@@ -33,8 +33,8 @@ function defeatsOpacity(value) {
 
 function make_result_info(data, is_dicom = false) {
   if (is_dicom) {
-    text = "Left lung: " + data.data.left_affection_percent * 100 + "% (" + data.data.left_defeats_volume + "sm3) affected<br>" +
-      "Right lung: " + data.data.right_affection_percent * 100 + "% (" + data.data.right_defeats_volume + "sm3) affected<br>"
+    text = "Left lung: " + data.data.left_affection_percent + "% (" + data.data.left_defeats_volume + "sm3) affected<br>" +
+      "Right lung: " + data.data.right_affection_percent + "% (" + data.data.right_defeats_volume + "sm3) affected<br>"
     $(".info_container .res").html(text)
     $(".info_container .stats").html("Total: " + data.data.stats.all_time + " s.")
   } else {
@@ -119,7 +119,7 @@ function sendDicomData(form) {
     $(".info_container").show(300);
     make_result_info(res, true);
     imgs = res.data.img_urls;
-    archive_url = res.data.archive; //!!!!!!!!!!!!!!!!!!!
+    archive_url = res.data.archive;
     img = document.querySelector(".result_image")
     setImageSrc(img, 0)
   });

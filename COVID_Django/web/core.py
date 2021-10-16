@@ -1,19 +1,17 @@
 # AI engine
 from tensorflow.image import resize
-from tensorflow.keras.preprocessing.image import img_to_array, load_img
+from tensorflow.keras.preprocessing.image import img_to_array
 from time import time
 from .ai_models import model
 from PIL import Image
 from os.path import join as join_path, isdir
 import zipfile
-from shutil import make_archive, rmtree
+from shutil import rmtree
 import os
 import pydicom as dicom
 import SimpleITK as sitk
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
-
 
 class Core:
     def __init__(self):
@@ -34,8 +32,6 @@ class Core:
         img_orig = Image.open(image_stream)
         img_orig = img_orig.convert('RGB')
         img_orig.save(path)
-        # img_orig = img_to_array(Image.open(image_stream))
-        # img_orig = img_to_array(load_img(path))
         img_orig = img_to_array(img_orig)
         size = img_orig.shape[:2]
 
@@ -43,15 +39,15 @@ class Core:
         lungs_output_path = path.split(".")[0] + "_lungs_web.png"
         defeats_output_path = lungs_output_path.replace("lung", "defeat")
 
-            #Mask for lungs
+        #Mask for lungs
         lung_mask = model.predict(self.lungs_3ch, img_orig)
         lung_pixels = model.visualize(lungs_output_path, lung_mask[0, ...], size)
 
-            #Mask for defeats
+        #Mask for defeats
         defeat_mask = model.predict(self.defeats_3ch, img_orig)
         defeat_pixels = model.visualize(defeats_output_path, defeat_mask[0, ...], size)
 
-            #Crop defeats
+        #Crop defeats
         model.correct_defeats(defeats_output_path, lung_mask, defeat_mask, size)
 
         data["affections_square"] = round(defeat_pixels/lung_pixels*100)
@@ -59,46 +55,8 @@ class Core:
         data["img_url"] = path, lungs_output_path, defeats_output_path
         data["stats"] = {"all_time": round(time() - time_start, 2)}
         return {"success": True, "result": "ok", "is_dicom": False, "data": data}
-    
-
-    # def work_dicom(self, path, file_stream):
-    #     # Extract incoming zip
-    #     if isdir(path):
-    #         rmtree(path)
-    #     arch = zipfile.ZipFile(file_stream)
-    #     arch.extractall(path)
-    #     arch.close()
-    #     del file_stream
-
-    #     # Dicom model work
-    #     array = []
-    #     slices = os.listdir(path)
-    #     for slice_name in enumerate(slices):
-    #         slice_path = join_path(path, slice_name[1])
-    #         img = dicom.read_file(slice_path).pixel_array
-    #         img = resize(img[..., None], (256, 256))
-    #         img = np.transpose(img, (1,0,2))
-    #         # mask_affections = model.predict(self.defeats_1ch, img)
-    #         # mask_affections = np.around(mask_affections)
-    #         mask_lungs = model.predict(self.lungs_1ch, img)
-    #         mask_lungs = np.around(mask_lungs)
-    #         # print(img)
-    #         fig, ax = plt.subplots(1, 1)
-    #         ax.imshow(img[..., 0])
-    #         ax.imshow(mask_lungs[0, ..., 0], alpha=0.5)
-    #         plt.show()
-    #         array.append(mask_lungs[0, ..., 0])
-    #     pred_slice = np.array(array, dtype=np.uint16)#.reshape((256, 256, -1))
-    #     pred_slice = sitk.GetImageFromArray(pred_slice)
-    #     result_path = join_path(path, "result")
-    #     if not isdir(result_path):
-    #         os.mkdir(result_path)
-    #     sitk.WriteImage(pred_slice, join_path(path, "result", f"{slice_name[0]}.dcm"))
-    #     return 1
-
 
     def work_dicom(self, path, file_stream):
-        # Extract incoming zip
         if isdir(path):
             rmtree(path)
         arch = zipfile.ZipFile(file_stream)
@@ -114,7 +72,7 @@ class Core:
         right_defeats_volume = 0
 
         info_img = dicom.read_file(join_path(path, slices[0]))
-        spacing_between_slices = 3 # НУЖНО НОРМАЛЬНО ЧИТАТЬ ИЗ МЕТАДАННЫХ КОТОРЫХ НЕТ НАХУЙ
+        spacing_between_slices = 3
         slice_thickness =  info_img.SliceThickness
         slice_distance = slice_thickness + spacing_between_slices
         pixel_size = np.mean(info_img.PixelSpacing)
@@ -172,27 +130,27 @@ class Core:
             left_defeats_volume += left_defeats_mm2 * slice_distance 
             right_defeats_volume += right_defeats_mm2 * slice_distance
 
-            if i==2:
-                i=0
-                orig_path = join_path(result_dir_path, slice_name[1]+".jpg")
-                overlay_path = join_path(result_dir_path, slice_name[1]+"_overlay.jpg")
+            if i == 2:
+                i = 0
+                orig_path = join_path(result_dir_path, slice_name[1] + ".jpg")
+                overlay_path = join_path(result_dir_path, slice_name[1] + "_overlay.jpg")
                 cv2.imwrite(orig_path, file.pixel_array)
                 jpg_paths_orig.append(orig_path)
                 cv2.imwrite(overlay_path, overlay)
                 jpg_paths_overlay.append(overlay_path)
-            i+=1
+            i += 1
    
         left_affection_percent = np.mean(left_affection_percent)
         right_affection_percent = np.mean(right_affection_percent)
         
-        pred_slice = np.array(worked_slices, dtype=np.uint16)#.reshape((256, 256, -1))
+        pred_slice = np.array(worked_slices, dtype=np.uint16)
         pred_slice = sitk.GetImageFromArray(pred_slice)
         result_path = join_path(path, "result", f"{slice_name[0]}.dcm")
         sitk.WriteImage(pred_slice, result_path)
     
         data = {}
-        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent, 2), round(right_affection_percent, 2)
-        data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume/1000, 2), round(right_defeats_volume/1000, 2)
+        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent * 100, 2), round(right_affection_percent * 100, 2)
+        data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume / 1000, 2), round(right_defeats_volume / 1000, 2)
         data["img_urls"] = jpg_paths_orig
         data["archive"] = result_path
         data["slice_count"] = len(slices)

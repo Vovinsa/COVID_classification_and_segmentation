@@ -84,10 +84,13 @@ def predict(model, img):
     return mask
 
 def predict_dicom(model, img):
-    img = sklearn.preprocessing.normalize(img[..., 0])[..., None]
+    img = img[..., 0][..., None] / 2048
     img = resize(img, (256, 256))
     mask = model.predict(img[None, ...])
     return mask
+
+def predict_nifti(model, img):
+    img = sklearn.preprocessing.normalize(img[..., 0])[..., None]
 
 def correct_defeats(path, lmask, dmask, size):
     mask = np.around(lmask[0, ...])
@@ -97,7 +100,7 @@ def correct_defeats(path, lmask, dmask, size):
     mask[:,:,1] = lungs
     mask[:,:,2] = lungs
 
-    res_defeats = (mask*dmask[0, ...])*255
+    res_defeats = (mask*dmask[0, ...]) * 255
     res_defeats = cv2.cvtColor(res_defeats, cv2.COLOR_BGR2RGB)
     res_defeats = np.array(resize(res_defeats, size))
     cv2.imwrite(path, res_defeats)
@@ -105,7 +108,6 @@ def correct_defeats(path, lmask, dmask, size):
 
 
 def visualize(path, mask, size=None, web=True):
-    # mask*=255
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
     if size is not None:
         mask = np.array(resize(mask, size))
@@ -114,16 +116,15 @@ def visualize(path, mask, size=None, web=True):
         cv2.imwrite(path, mask*255)
 
     mask = np.around(mask)
-    cv2.imwrite(path.replace("_web", ""), mask*255)
+    cv2.imwrite(path.replace("_web", ""), mask * 255)
 
     return np.sum(mask)
 
 def visualize_with_mask(path, img, mask, size=None):
-    mask*=255
+    mask *= 255
     if size:
         mask = np.array(resize(mask, size))
     img = cv2.addWeighted(img, 1, mask, 0.4, 0.0)
-    # mask = np.around(mask)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     cv2.imwrite(path, img)
     return
@@ -133,25 +134,20 @@ def calc_defeats(lungs_output_path, defeats_output_path):
     src = np.array(Image.open(defeats_output_path.replace("_web", "")))
     mask_orig = Image.open(lungs_output_path.replace("_web", ""))
 
-    # Image.fromarray((src*(np.array(mask_orig)/255)).astype(np.uint8)).save('temp/detect_defeats1.png') ##
-
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
 
-    mask[:,:,1] = mask[:,:,0]
-    mask[:,:,2] = mask[:,:,0]
+    mask[:, :, 1] = mask[:, :, 0]
+    mask[:, :, 2] = mask[:, :, 0]
     mask = mask / 255
     ldst = src * mask
-    left = count_points(np.around(ldst/255)*255)
-    # Image.fromarray(ldst.astype(np.uint8)).save('temp/left_defeats.png')
+    left = count_points(np.around(ldst / 255) * 255)
 
     mask = np.array(mask_orig.resize(src.shape[1::-1], Image.BILINEAR))
-    mask[:,:,0] = mask[:,:,1]
-    mask[:,:,2] = mask[:,:,1]
+    mask[:, :, 0] = mask[:, :, 1]
+    mask[:, :, 2] = mask[:, :, 1]
     mask = mask / 255
     rdst = src * mask
-    right = count_points(np.around(rdst/255)*255)
-
-    # Image.fromarray(rdst.astype(np.uint8)).save('temp/right_defeats.png')
+    right = count_points(np.around(rdst / 255) * 255)
     
     return left, right
 

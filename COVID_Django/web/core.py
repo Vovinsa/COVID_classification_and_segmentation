@@ -25,15 +25,15 @@ class Core:
         self.lungs_3ch.load_weights(join_path("web", "weights", "3ch_lungs.h5"))
 
         self.defeats_1ch = model.create_model(1, 1)
-        self.defeats_1ch.load_weights(join_path("web", "weights", "1ch_defeats_mosmed.h5"))
+        self.defeats_1ch.load_weights(join_path("web", "weights", "1ch_defeats.h5"))
         self.lungs_1ch = model.create_model(1, 2)
-        self.lungs_1ch.load_weights(join_path("web", "weights", "1ch_lungs_kristi.h5"))
+        self.lungs_1ch.load_weights(join_path("web", "weights", "1ch_lungs.h5"))
     
     def work(self, path, image_stream=None):
         data = {}
         time_start = time()
         img_orig = Image.open(image_stream)
-        img_orig = img_orig.convert('RGB')
+        img_orig = img_orig.convert("RGB")
         img_orig.save(path)
         img_orig = img_to_array(img_orig)
         size = img_orig.shape[:2]
@@ -104,6 +104,8 @@ class Core:
             os.mkdir(result_dir_path)
         
         for slice_name in enumerate(slices):
+            if slice_name[1] == "__MACOSX":
+                continue
             slice_path = join_path(path, slice_name[1])
             if is_nibabel:
                 file = nib.load(slice_path)
@@ -150,13 +152,16 @@ class Core:
 
             if i==2:
                 i=0
-                orig_path = join_path(result_dir_path, slice_name[1]+".jpg")
-                overlay_path = join_path(result_dir_path, slice_name[1]+"_overlay.jpg")
-                cv2.imwrite(orig_path, img*1.5)
+                orig_path = join_path(result_dir_path, slice_name[1]+".png")
+                overlay_path = join_path(result_dir_path, slice_name[1]+"_overlay.png")
+                cv2.imwrite(orig_path, (img / 2048 + 1) * 100)
                 jpg_paths_orig.append(orig_path)
-                cv2.imwrite(overlay_path, np.around(resize(mask_affections[0, ...], (image_size[0], image_size[1])) * 255))
+                overlay = np.zeros((image_size[0], image_size[1], 4), np.uint8)
+                overlay[:, :, 2] = overlay[:, :, 3] = (resize(mask_affections[0, ...], (image_size[0], image_size[1])) * 255)[..., 0]
+                cv2.imwrite(overlay_path, np.around(overlay))
                 jpg_paths_overlay.append(overlay_path)
-            i+=1
+            i += 1
+
         #Усредняем проценты поражения
         left_affection_percent = np.mean(left_affection_percent) 
         right_affection_percent = np.mean(right_affection_percent)
@@ -170,7 +175,7 @@ class Core:
         sitk.WriteImage(pred_slice, result_path)
 
         data = {}
-        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent * 1000, 2), round(right_affection_percent*100, 2)
+        data["left_affection_percent"], data["right_affection_percent"] = 1, 1
         data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume / 10000, 2), round(right_defeats_volume / 1000, 2)
         data["img_urls"] = jpg_paths_orig, jpg_paths_overlay
         data["archive"] = result_path

@@ -33,6 +33,7 @@ source ~/miniforge3/bin/activate
 conda install -c apple tensorflow-deps
 python -m pip install tensorflow-macos
 python -m pip install tensorflow-metal
+```
 
 - run to move in COVID_Django folder:
 

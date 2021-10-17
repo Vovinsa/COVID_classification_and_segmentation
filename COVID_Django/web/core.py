@@ -104,6 +104,8 @@ class Core:
             os.mkdir(result_dir_path)
         
         for slice_name in enumerate(slices):
+            if slice_name[1] == "__MACOSX":
+                continue
             slice_path = join_path(path, slice_name[1])
             if is_nibabel:
                 file = nib.load(slice_path)
@@ -119,8 +121,8 @@ class Core:
             mask_lungs = model.predict_dicom(self.lungs_1ch, img)
             mask_lungs = np.round(mask_lungs)
 
-            overlay = img[..., 0] + resize(mask_affections_round[0, ...], (image_size[0], image_size[1]))[..., 0] * 255
-            overlay = np.array(overlay)
+            overlay = (img / 2048 + 1 + resize(mask_affections_round[0, ...], (image_size[0], image_size[1]))) * 255
+            overlay = np.array(overlay[..., 0])
             worked_slices.append(overlay)
 
             left_lung = mask_lungs[..., 0]
@@ -131,8 +133,8 @@ class Core:
             right_lung_pixels = np.sum(right_lung)
 
             #Crop affections by mask
-            left_affection_crop = left_lung * mask_affections_round
-            right_affection_crop = right_lung * mask_affections_round
+            left_affection_crop = np.sum(left_lung * mask_affections_round)
+            right_affection_crop = np.sum(right_lung * mask_affections_round)
 
             #Count affection square in pixels
             left_defeats_pixels = np.sum(left_affection_crop)
@@ -144,9 +146,9 @@ class Core:
             if right_defeats_pixels > 0:
                 right_affection_percent.append(right_defeats_pixels / right_lung_pixels)
 
-            #Calc affection square in mm2
-            left_defeats_mm2 = left_defeats_pixels * pixel_size 
-            right_defeats_mm2 = right_defeats_pixels * pixel_size 
+            #Calc affection square in mmm2
+            left_defeats_mm2 = left_affection_crop * pixel_size 
+            right_defeats_mm2 = right_affection_crop * pixel_size 
 
             #Calc affection square in mm3
             left_defeats_volume += left_defeats_mm2 * slice_distance 
@@ -168,16 +170,18 @@ class Core:
         right_affection_percent_result = np.sum(right_affection_percent) / len(slices)
 
         pred_slice = np.array(worked_slices, dtype=np.uint16)
+        print(pred_slice.shape)
         pred_slice = sitk.GetImageFromArray(pred_slice)
         if is_nibabel:
-            result_path = join_path(path, "result", f"{slice_name[0]}.nii")
+            result_path = join_path(path, "result", f"{slice_name[0]}.dcm")
         else:
             result_path = join_path(path, "result", f"{slice_name[0]}.dcm")
+        
         sitk.WriteImage(pred_slice, result_path)
     
         data = {}
-        data["left_affection_percent"], data["right_affection_percent"] = round(left_affection_percent_result * 100, 2), round(right_affection_percent_result * 100, 2)
-        data["left_defeats_volume"], data["right_defeats_volume"] = round(left_defeats_volume / 10000, 2), round(right_defeats_volume / 1000, 2)
+        data["left_affection_percent"], data["right_affection_percent"] = np.round(left_affection_percent_result * 100, 2), np.round(right_affection_percent_result * 100, 2)
+        data["left_defeats_volume"], data["right_defeats_volume"] = np.round(left_defeats_volume / 10000, 2), np.round(right_defeats_volume / 1000, 2)
         data["img_urls"] = jpg_paths_orig, jpg_paths_overlay
         data["archive"] = result_path
         data["slice_count"] = len(slices)

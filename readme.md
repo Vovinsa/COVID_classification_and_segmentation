@@ -15,7 +15,6 @@ python3 install -r requirements.txt
 - run to start server:
 
 ```
-cd COVID_Django
 python3 manage.py runserver 0.0.0.0:5000
 ```
 
@@ -40,7 +39,6 @@ python -m pip install tensorflow-metal
 ```
 cd COVID_Django
 ```
-```
 
 - run to install requirements:
 
@@ -51,7 +49,6 @@ python3 install -r requirements.txt
 - run to start server:
 
 ```
-cd COVID_Django
 python3 manage.py runserver 0.0.0.0:5000
 ```
 

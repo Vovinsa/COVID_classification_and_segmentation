@@ -7,3 +7,4 @@ django-cors-headers==3.10.0
 Django==3.2.7
 Pillow==8.3.2
 gunicorn==20.0.4
+nibabel==3.2.1

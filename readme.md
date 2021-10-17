@@ -1,9 +1,15 @@
 # Covid classification and segmentation
 
+- run to move in COVID_Django folder:
+
+```
+cd COVID_Django
+```
+
 - run to install requirements:
 
 ```
-python3 install -r COVID_Django/requirements.txt
+python3 install -r requirements.txt
 ```
 
 - run to start server:
@@ -28,12 +34,18 @@ source ~/miniforge3/bin/activate
 conda install -c apple tensorflow-deps
 python -m pip install tensorflow-macos
 python -m pip install tensorflow-metal
+
+- run to move in COVID_Django folder:
+
+```
+cd COVID_Django
+```
 ```
 
 - run to install requirements:
 
 ```
-python3 install -r COVID_Django/requirements.txt
+python3 install -r requirements.txt
 ```
 
 - run to start server:
@@ -43,7 +55,15 @@ cd COVID_Django
 python3 manage.py runserver 0.0.0.0:5000
 ```
 
+### View for loading scan/archive
+
 !["img"](covid.png)
+
+### View of PNG scan prediction
+
 !["img_main"](covid_main.png)
+
+### Dicom viewer
+
 !["img_dicom_viewer"](dicom_viewer.png)
   

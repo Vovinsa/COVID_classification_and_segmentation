@@ -10,7 +10,7 @@ html, body{
 }
 body{
     background: rgb(14,251,242);
-    background: linear-gradient(90deg, rgba(14,251,242,1) 0%, rgba(145,178,255,1) 100%);
+    background: linear-gradient(90deg, rgba(14,251,242,1) 0%, rgba(107,211,255,1) 100%);
     background-size: 100%;
     background-position: cover;
     background-repeat: no-repeat;

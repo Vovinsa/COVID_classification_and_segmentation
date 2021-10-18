@@ -21,7 +21,7 @@ python3 manage.py runserver 0.0.0.0:5000
 ## If you are using Mac on M1
 
 - download [Miniforge](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh)
-- run to install tensorflow for Mac with M1:
+- run to install tensorflow for Mac on M1:
 
 ```
 python3 -m venv ~/tensorflow-metal
